@@ -16,8 +16,8 @@ extension LabelStyle where Self == Headline1Style {
 struct Headline1Style: LabelStyle {
     
     func makeBody(configuration: Configuration) -> some View {
-        Label(configuration)
-            .font(Font.custom("Helvetica", size: 24))
+        configuration.title
+            .font(Font.custom("Helvetica-Regular", size: 24))
             .foregroundColor(.black)
             .frame(width: 141, height: 18, alignment: .topLeading)
     }

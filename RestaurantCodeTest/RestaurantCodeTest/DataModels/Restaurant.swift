@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Restaurant: Decodable {
+struct Restaurant: Decodable, Identifiable {
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -17,6 +17,8 @@ struct Restaurant: Decodable {
         case imageURL = "image_url"
         case deliveryTimeInMinutes = "delivery_time_minutes"
     }
+    
+    let uuID = UUID ()
     
     let id: String
     let name: String

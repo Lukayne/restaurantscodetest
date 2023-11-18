@@ -8,19 +8,36 @@
 import SwiftUI
 
 struct RestaurantsListView: View {
-    @ObservedObject var restaurantListViewModel: RestaurantListViewModel
+    @StateObject var restaurantListViewModel: RestaurantListViewModel
     
     var body: some View {
         switch restaurantListViewModel.restaurantState {
-        case .loading:
+        case .loadingRestaurants, .loadingFilters:
             ProgressView()
         case .error:
             Text("Error")
-        case .success:
-            List {
-                ForEach(restaurantListViewModel.restaurants, id: \.id) { restaurant in
-                    RestaurantCardView(image: Image("image"), restaurantName: restaurant.name, restaurantTags: restaurant.filterIds.joined(), rating: String(restaurant.rating))
-                }
+        case .loadedRestaurants, .loadedFilters, .finishedLoading:
+            VStack {
+                filters
+                restaurants
+            }
+        }
+    }
+    
+    @ViewBuilder private var restaurants: some View {
+        List {
+            ForEach(restaurantListViewModel.restaurantsWithFilterNames, id: \.restaurant.id) { restaurantWrapper in
+                RestaurantCardView(restaurantWrapper: restaurantWrapper)
+                    .id(restaurantWrapper.restaurant.id)
+            }
+        }
+    }
+    
+    @ViewBuilder private var filters: some View {
+        List {
+            ForEach(restaurantListViewModel.filtersWithImages, id: \.filter.id) { filterWrapper in
+                FilterView(filterWrapper: filterWrapper)
+                    .id(filterWrapper.filter.id)
             }
         }
     }

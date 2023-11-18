@@ -5,35 +5,30 @@
 //  Created by Richard Smith on 2023-11-15.
 //
 
-import UIKit
 import Combine
+import SwiftUI
+import UIKit
 
-class ImageCacher {
-    
-    @Published var imageCache = [NSCache<AnyObject, AnyObject>]()
-    
-    var subscription: AnyCancellable?
-    
-    
-    init() {
-        
+class ImageLoader: ObservableObject {
+    @Published var image: Image?
+
+    init(url: String) {
+        loadImage(from: url)
     }
-    
-    deinit {
-        
-    }
-    
-    
-    func cacheImage(urlString: String) {
-        guard let url = URL(string: urlString) else {
+
+    private func loadImage(from url: String) {
+        guard let url = URL(string: url) else {
             return
         }
-        
-        URLSession.shared
-            .dataTaskPublisher(for: url)
-            .map { UIImage(data: $0.data) }
-            .replaceError(with: nil)
-            .receive(on: RunLoop.main)
-//            .ass
+
+        DispatchQueue.global().async {
+            if let data = try? Data(contentsOf: url) {
+                if let uiImage = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.image = Image(uiImage: uiImage)
+                    }
+                }
+            }
+        }
     }
 }

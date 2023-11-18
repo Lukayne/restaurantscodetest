@@ -8,13 +8,23 @@
 import SwiftUI
 
 struct RestaurantsDetailView: View {
+    
+    @StateObject var restaurantDetailViewModel: RestaurantDetailViewModel
+    
     var body: some View {
-        Text("Hello, World!")
+        VStack {
+            subTitleDetailCard
+        }
+    }
+    
+    
+    @ViewBuilder private var subTitleDetailCard: some View {
+        SubtitleDetailCard()
     }
 }
 
 struct RestaurantsDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        RestaurantsDetailView()
+        RestaurantsDetailView(restaurantDetailViewModel: RestaurantDetailViewModel())
     }
 }
