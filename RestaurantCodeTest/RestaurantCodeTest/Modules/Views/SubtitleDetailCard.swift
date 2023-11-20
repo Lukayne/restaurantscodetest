@@ -9,19 +9,23 @@ import SwiftUI
 
 struct SubtitleDetailCard: View {
     
+    var openStatus: OpenStatus
+    var restaurant: RestaurantWrapper
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Title")
+            Text(restaurant.restaurant.name)
                 .modifier(TextHeadline1())
                 .foregroundColor(darkTextColor)
-            Text("Subtitle")
-                .modifier(TextHeadline2())
+            Spacer()
+            Text(restaurant.filterNames.joined(separator: " - "))
+                .modifier(TextSubtitle1())
+                .frame(width: 311, height: 35, alignment: .leading)
                 .foregroundColor(subTitleColor)
-            HStack(alignment: .center, spacing: 0) {
-                
-            }
-            .padding(0)
-            .frame(width: 311, height: 35, alignment: .center)
+            Spacer()
+            Text("\(openStatus.isCurrentlyOpen.description)")
+                .modifier(TextTitle1())
+                .foregroundColor(positiveColor)
         }
         .padding(16)
         .frame(width: 343, height: 144, alignment: .leading)
@@ -29,12 +33,10 @@ struct SubtitleDetailCard: View {
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 4)
     }
-    
-    
 }
 
 struct SubtitleDetailCard_Previews: PreviewProvider {
     static var previews: some View {
-        SubtitleDetailCard()
+        SubtitleDetailCard(openStatus: OpenStatus(restaurantID: "RESTAURANTID", isCurrentlyOpen: false), restaurant: RestaurantWrapper(restaurant: Restaurant(id: "RESTAURANTID", name: "Pepes", rating: 4.0, filterIds: [""], imageURL: "IMAGEURL", deliveryTimeInMinutes: 50)))
     }
 }

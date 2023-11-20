@@ -264,13 +264,13 @@
 			isa = PBXGroup;
 			children = (
 				848532012B06AD1500BF7394 /* Text */,
-				848531D72B04F83700BF7394 /* Labels */,
+				848531D72B04F83700BF7394 /* Labels (not needed for the current scope) */,
 				848531D82B04F9B100BF7394 /* RestaurantColors.swift */,
 			);
 			path = Styling;
 			sourceTree = "<group>";
 		};
-		848531D72B04F83700BF7394 /* Labels */ = {
+		848531D72B04F83700BF7394 /* Labels (not needed for the current scope) */ = {
 			isa = PBXGroup;
 			children = (
 				848531D52B04EB9000BF7394 /* Title1Style.swift */,
@@ -280,7 +280,7 @@
 				848531E02B0501FD00BF7394 /* Headline1Style.swift */,
 				848531E22B05025400BF7394 /* Headline2Style.swift */,
 			);
-			name = Labels;
+			name = "Labels (not needed for the current scope)";
 			sourceTree = "<group>";
 		};
 		848531E92B0527DB00BF7394 /* Networking */ = {

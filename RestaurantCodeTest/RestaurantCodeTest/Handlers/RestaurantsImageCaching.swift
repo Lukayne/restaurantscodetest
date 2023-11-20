@@ -1,10 +1,3 @@
-//
-//  RestaurantsImageCaching.swift
-//  RestaurantCodeTest
-//
-//  Created by Richard Smith on 2023-11-15.
-//
-
 import Combine
 import SwiftUI
 import UIKit

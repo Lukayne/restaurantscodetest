@@ -24,30 +24,12 @@ enum RestaurantServiceEndpoints {
             return .GET
         }
     }
-    
-//  // compose the NetworkRequest
-//    func createRequest(token: String, environment: Environment) -> NetworkRequest {
-//        var headers: Headers = [:]
-//        headers["Content-Type"] = "application/json"
-//        headers["Authorization"] = "Bearer \(token)"
-//        return NetworkRequest(url: getURL(from: environment), headers: headers, reqBody: requestBody, httpMethod: httpMethod)
-//    }
-    
+        
     func createRequest(environment: Environment) -> NetworkRequest {
         var headers: Headers = [:]
         headers["accept"] = "application/json"
         return NetworkRequest(url: getURL(from: environment), headers: headers, reqBody: nil, httpMethod: httpMethod)
     }
-    
-//  // encodable request body for POST
-//    var requestBody: Encodable? {
-//        switch self {
-//        case .purchaseProduct(let request):
-//            return request
-//        default:
-//            return nil
-//        }
-//    }
     
   // compose urls for each request
     func getURL(from environment: Environment) -> String {
@@ -82,3 +64,24 @@ extension Environment {
         }
     }
 }
+
+
+// TODO: Check if needed
+
+//  // encodable request body for POST
+//    var requestBody: Encodable? {
+//        switch self {
+//        case .purchaseProduct(let request):
+//            return request
+//        default:
+//            return nil
+//        }
+//    }
+
+//  // compose the NetworkRequest
+//    func createRequest(token: String, environment: Environment) -> NetworkRequest {
+//        var headers: Headers = [:]
+//        headers["Content-Type"] = "application/json"
+//        headers["Authorization"] = "Bearer \(token)"
+//        return NetworkRequest(url: getURL(from: environment), headers: headers, reqBody: requestBody, httpMethod: httpMethod)
+//    }

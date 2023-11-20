@@ -62,5 +62,4 @@ class RestaurantService: RestaurantServiceable {
         
         return self.networkRequest.request(request)
     }
-    
 }

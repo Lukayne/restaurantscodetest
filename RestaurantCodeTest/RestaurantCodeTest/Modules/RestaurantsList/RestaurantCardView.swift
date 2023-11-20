@@ -10,6 +10,13 @@ import SwiftUI
 struct RestaurantCardView: View {
     var restaurantWrapper: RestaurantWrapper
 
+    @StateObject private var imageLoader: ImageLoader
+    
+    init(restaurantWrapper: RestaurantWrapper) {
+        self.restaurantWrapper = restaurantWrapper
+        self._imageLoader = StateObject(wrappedValue: ImageLoader(url: restaurantWrapper.restaurant.imageURL))
+    }
+    
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
@@ -18,15 +25,15 @@ struct RestaurantCardView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .overlay(
                         // Use cached image if available, otherwise use placeholder
-                        (restaurantWrapper.image != nil ?
+                        (imageLoader.image != nil ?
                             AnyView(
-                                restaurantWrapper.image!
+                                imageLoader.image!
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
+                                    .scaledToFill()
                                     .frame(width: 343, height: 132)
                                     .clipped()
-                            ) :
-                            AnyView(Image("placeholder"))
+                            ) : AnyView(ProgressView()) 
                         )
                     )
                     .cornerRadius(12)
@@ -35,15 +42,15 @@ struct RestaurantCardView: View {
                         Text(restaurantWrapper.restaurant.name)
                             .modifier(TextTitle1())
                             .foregroundColor(darkTextColor)
-                        Text(restaurantWrapper.filterNames.joined(separator: ", "))
+                        Text(restaurantWrapper.filterNames.joined(separator: " - "))
                             .modifier(TextSubtitle1())
                             .foregroundColor(subTitleColor)
                         ZStack {
-                            Image("clock_icon")
-                                .frame(width: 10, height: 10)
                             Text("\(restaurantWrapper.restaurant.deliveryTimeInMinutes)")
                                 .modifier(TextFooter1())
                                 .foregroundColor(footerColor)
+                            Image("clock_icon")
+                                .frame(width: 10, height: 10)
                         }
                         .frame(width: 138, height: 12)
                     }
@@ -71,7 +78,12 @@ struct RestaurantCardView: View {
         .padding(0)
         .frame(width: 343, height: 196, alignment: .center)
         .background(.white)
-        .cornerRadius(12)
+        .clipShape(.rect(
+            topLeadingRadius: 12,
+            topTrailingRadius: 12,
+            bottomLeadingRadius: 0,
+            topTrailingRadius: 0)
+        )
         .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 4)
     }
 }

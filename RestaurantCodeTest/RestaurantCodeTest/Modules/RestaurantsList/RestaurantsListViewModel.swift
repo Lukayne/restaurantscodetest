@@ -26,14 +26,16 @@ class RestaurantListViewModel: ObservableObject {
 
     @Published var restaurantsWithFilterNames: [RestaurantWrapper] = []
     @Published var filtersWithImages: [FilterWrapper] = []
+    @Published var filters: [Filter] = []
+    @Published var selectedRestaurant: RestaurantWrapper = RestaurantWrapper(restaurant: Restaurant(id: "", name: "", rating: 0, filterIds: [""], imageURL: "", deliveryTimeInMinutes: 0))
     
     @Published private var imagesToLoadRestaurant: [String: String] = [:]
     @Published private var filterNames: [String] = []
-
+    @Published private var loadedImages: [String: Image] = [:]
+    
     private var bag = Set<AnyCancellable>()
     
     init() {
-        
     }
     
     deinit {
@@ -45,8 +47,6 @@ class RestaurantListViewModel: ObservableObject {
     }
     
     private func loadAllRestaurants() {
-        restaurantState = .loadingRestaurants
-
         let service = RestaurantService(networkRequest: NativeRequestable(), environment: .development)
         service.getAllRestaurants()
             .sink { [weak self] (completion) in
@@ -70,29 +70,44 @@ class RestaurantListViewModel: ObservableObject {
                             service.getFilter(filterId: filterID)
                                 .replaceError(with: Filter(id: "", name: "", imageURL: ""))
                                 .map { $0.name }
+                            // Ensure UI updates on the main thread
+                                .receive(on: DispatchQueue.main)
+                                .eraseToAnyPublisher()
                         }
                     }
 
                 let cancellable = Publishers.MergeMany(filterRequests)
                     .collect()
                     .sink { filterNames in
-                        let groupedFilterNames = Dictionary(grouping: filterNames.enumerated(), by: { $0.offset / restaurantWrappers.count })
+                        var groupedFilterNames: [String: [String]] = [:]
 
-                        for (index, group) in groupedFilterNames {
-                            let restaurantIndex = index % restaurantWrappers.count
-                            restaurantWrappers[restaurantIndex].filterNames = group.map { $0.element }
+                        var currentIndex = 0
+
+                        for restaurant in response.restaurants {
+                            var filterNamesForRestaurant: [String] = []
+                            
+                            for _ in restaurant.filterIds {
+                                filterNamesForRestaurant.append(filterNames[currentIndex])
+                                currentIndex += 1
+                            }
+                            
+                            groupedFilterNames[restaurant.id] = filterNamesForRestaurant
                         }
 
-                        // Update each restaurant with corresponding filter names
-                        self.restaurantsWithFilterNames = restaurantWrappers
-
+                        self.restaurantsWithFilterNames = response.restaurants.map { restaurant in
+                            let wrapper = RestaurantWrapper(restaurant: restaurant)
+                            wrapper.filterNames = groupedFilterNames[restaurant.id] ?? []
+                            return wrapper
+                        }
+                        
+                        
                         // Load images for all restaurants
-                        for wrapper in restaurantWrappers {
-                            self.loadImageForRestaurant(
-                                id: wrapper.restaurant.id,
-                                stringURL: wrapper.restaurant.imageURL
-                            )
-                        }
+//                        for wrapper in restaurantWrappers {
+//                            self.loadImageForRestaurant(
+//                                id: wrapper.restaurant.id,
+//                                stringURL: wrapper.restaurant.imageURL
+//                            )
+//                        }
                         
                         
 
@@ -141,7 +156,7 @@ class RestaurantListViewModel: ObservableObject {
     func loadImageForRestaurant(id: String, stringURL: String) {
         // Update the imagesToLoad dictionary
         imagesToLoadRestaurant[id] = stringURL
-        
+
         // Load the image
         loadImage(id: id, stringURL: stringURL)
     }

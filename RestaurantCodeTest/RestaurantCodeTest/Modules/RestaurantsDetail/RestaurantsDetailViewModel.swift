@@ -18,12 +18,12 @@ class RestaurantDetailViewModel: ObservableObject {
     
     @Published var resturantDetailState: RestaurantDetailState = .loadingDetailStatus
     @Published var restaurantOpenStatus: OpenStatus = OpenStatus(restaurantID: "", isCurrentlyOpen: false)
-    
+    @Published var restaurant: RestaurantWrapper
     
     private var bag = Set<AnyCancellable>()
     
-    init() {
-        
+    init(restaurant: RestaurantWrapper) {
+        self.restaurant = restaurant
     }
     
     deinit {
@@ -36,6 +36,19 @@ class RestaurantDetailViewModel: ObservableObject {
     }
 
     private func loadOpenStatus() {
-        
+        let service = RestaurantService(networkRequest: NativeRequestable(), environment: .development)
+        service.getOpenStatusForRestaurant(restaurantId: restaurant.restaurant.id)
+            .sink { [weak self] (completion) in
+                switch completion {
+                case .failure(let error):
+                    print("Error loading open status for \(self?.restaurant.restaurant.id): \(error.localizedDescription)")
+                case .finished:
+                    print("")
+                }
+            } receiveValue: { [weak self] (response) in
+                print("RESPONSE; \(response)")
+                self?.restaurantOpenStatus = response
+            }
+            .store(in: &bag)
     }
 }
