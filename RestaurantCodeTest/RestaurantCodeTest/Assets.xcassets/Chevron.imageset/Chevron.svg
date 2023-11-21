@@ -1,0 +1,29 @@
+<svg width="25" height="19" viewBox="0 0 25 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Chevron" filter="url(#filter0_d_53_487)">
+<g id="Icon" filter="url(#filter1_d_53_487)">
+<path d="M20.6742 2.97652C20.885 2.76125 21 2.48728 21 2.16438C21 1.51859 20.5017 1 19.8692 1C19.553 1 19.2655 1.13699 19.0451 1.36204L12.4904 8.21135L5.9549 1.36204C5.7345 1.13699 5.43743 1 5.13078 1C4.49831 1 4 1.51859 4 2.16438C4 2.48728 4.11499 2.76125 4.32582 2.97652L11.6088 10.589C11.8579 10.863 12.1646 10.9902 12.5 11C12.8354 11 13.1229 10.863 13.3816 10.589L20.6742 2.97652Z" fill="#1F2B2E"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_d_53_487" x="0" y="0" width="25" height="19" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="4"/>
+<feGaussianBlur stdDeviation="2"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_53_487"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_53_487" result="shape"/>
+</filter>
+<filter id="filter1_d_53_487" x="0" y="1" width="25" height="18" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="4"/>
+<feGaussianBlur stdDeviation="2"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_53_487"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_53_487" result="shape"/>
+</filter>
+</defs>
+</svg>

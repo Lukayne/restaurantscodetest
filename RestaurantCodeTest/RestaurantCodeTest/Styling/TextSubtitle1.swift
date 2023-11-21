@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct TextSubtitle1: ViewModifier {
+
     func body(content: Content) -> some View {
         content
             .font(.custom("Helvetica-Regular", size: 12)
                 .weight(.bold))
-            .frame(width: 122, height: 18, alignment: .topLeading)
+//            .frame(width: 122, height: 18, alignment: .topLeading)
     }
 }

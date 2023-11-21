@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct RestaurantCardView: View {
+    
     var restaurantWrapper: RestaurantWrapper
-
     @StateObject private var imageLoader: ImageLoader
     
     init(restaurantWrapper: RestaurantWrapper) {
@@ -42,15 +42,18 @@ struct RestaurantCardView: View {
                         Text(restaurantWrapper.restaurant.name)
                             .modifier(TextTitle1())
                             .foregroundColor(darkTextColor)
+                            .frame(width: 269, alignment: .topLeading)
                         Text(restaurantWrapper.filterNames.joined(separator: " - "))
                             .modifier(TextSubtitle1())
                             .foregroundColor(subTitleColor)
-                        ZStack {
+                            .frame(width: 327, alignment: .topLeading)
+                        HStack {
+                            Image("clock_icon")
+                                .frame(width: 10, height: 10)
                             Text("\(restaurantWrapper.restaurant.deliveryTimeInMinutes)")
                                 .modifier(TextFooter1())
                                 .foregroundColor(footerColor)
-                            Image("clock_icon")
-                                .frame(width: 10, height: 10)
+                                .frame(width: 125, alignment: .topLeading)
                         }
                         .frame(width: 138, height: 12)
                     }
@@ -80,8 +83,7 @@ struct RestaurantCardView: View {
         .background(.white)
         .clipShape(.rect(
             topLeadingRadius: 12,
-            topTrailingRadius: 12,
-            bottomLeadingRadius: 0,
+            bottomLeadingRadius: 0, bottomTrailingRadius: 12,
             topTrailingRadius: 0)
         )
         .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 4)
@@ -89,8 +91,8 @@ struct RestaurantCardView: View {
 }
 
 
-//struct RestaurantCardView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        RestaurantCardView(image: Image(""), restaurantName: "Krögarn", restaurantTags: "Tag tag tag", rating: "4.3", deliveryTime: "30 mins")
-//    }
-//}
+struct RestaurantCardView_Previews: PreviewProvider {
+    static var previews: some View {
+        RestaurantCardView(restaurantWrapper: RestaurantWrapper(restaurant: Restaurant(id: "", name: "", rating: 4, filterIds: [""], imageURL: "imageurl", deliveryTimeInMinutes: 50)))
+    }
+}

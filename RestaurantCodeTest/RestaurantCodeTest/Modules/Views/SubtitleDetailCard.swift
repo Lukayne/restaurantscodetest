@@ -9,23 +9,24 @@ import SwiftUI
 
 struct SubtitleDetailCard: View {
     
-    var openStatus: OpenStatus
-    var restaurant: RestaurantWrapper
+    @ObservedObject var restaurantDetailViewModel: RestaurantDetailViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(restaurant.restaurant.name)
+            Text(restaurantDetailViewModel.restaurant.restaurant.name)
                 .modifier(TextHeadline1())
                 .foregroundColor(darkTextColor)
+                .frame(width: 311, height: 42, alignment: .leading)
             Spacer()
-            Text(restaurant.filterNames.joined(separator: " - "))
+            Text(restaurantDetailViewModel.restaurant.filterNames.joined(separator: " - "))
                 .modifier(TextSubtitle1())
                 .frame(width: 311, height: 35, alignment: .leading)
                 .foregroundColor(subTitleColor)
             Spacer()
-            Text("\(openStatus.isCurrentlyOpen.description)")
+            Text(restaurantDetailViewModel.getOpenStatusText())
                 .modifier(TextTitle1())
-                .foregroundColor(positiveColor)
+                .foregroundColor(restaurantDetailViewModel.restaurantOpenStatus.isCurrentlyOpen ? positiveColor : negativeColor)
+                .frame(width: 311, height: 35, alignment: .leading)
         }
         .padding(16)
         .frame(width: 343, height: 144, alignment: .leading)
@@ -37,6 +38,6 @@ struct SubtitleDetailCard: View {
 
 struct SubtitleDetailCard_Previews: PreviewProvider {
     static var previews: some View {
-        SubtitleDetailCard(openStatus: OpenStatus(restaurantID: "RESTAURANTID", isCurrentlyOpen: false), restaurant: RestaurantWrapper(restaurant: Restaurant(id: "RESTAURANTID", name: "Pepes", rating: 4.0, filterIds: [""], imageURL: "IMAGEURL", deliveryTimeInMinutes: 50)))
+        SubtitleDetailCard(restaurantDetailViewModel: RestaurantDetailViewModel(restaurant: RestaurantWrapper(restaurant: Restaurant(id: "SOMEID", name: "NAME", rating: 10, filterIds: ["filterid", ".."], imageURL: "imageURL", deliveryTimeInMinutes: 50))))
     }
 }

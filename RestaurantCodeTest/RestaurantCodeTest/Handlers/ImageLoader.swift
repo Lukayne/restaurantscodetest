@@ -1,3 +1,10 @@
+//
+//  ImageLoader.swift
+//  RestaurantCodeTest
+//
+//  Created by Richard Smith on 2023-11-18.
+//
+
 import Combine
 import SwiftUI
 import UIKit

@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 
+// MARK: Not implemented at the moment.
 enum RestaurantDetailState: Equatable, CaseIterable {
     case loadingDetailStatus
     case error
@@ -34,19 +35,27 @@ class RestaurantDetailViewModel: ObservableObject {
     func onAppear() {
         loadOpenStatus()
     }
+    
+    func getOpenStatusText() -> String {
+        // MARK: The strings wouldn't be used like this, they would instead come from Localizable.
+        return restaurantOpenStatus.isCurrentlyOpen ? "Open" : "Closed"
+    }
 
     private func loadOpenStatus() {
+        resturantDetailState = .loadingDetailStatus
+        
         let service = RestaurantService(networkRequest: NativeRequestable(), environment: .development)
         service.getOpenStatusForRestaurant(restaurantId: restaurant.restaurant.id)
             .sink { [weak self] (completion) in
                 switch completion {
                 case .failure(let error):
-                    print("Error loading open status for \(self?.restaurant.restaurant.id): \(error.localizedDescription)")
+                    self?.resturantDetailState = .error
+                    print("\(error.localizedDescription)")
                 case .finished:
                     print("")
                 }
             } receiveValue: { [weak self] (response) in
-                print("RESPONSE; \(response)")
+                self?.resturantDetailState = .finishedLoading
                 self?.restaurantOpenStatus = response
             }
             .store(in: &bag)

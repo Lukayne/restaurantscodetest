@@ -24,8 +24,8 @@ public class NativeRequestable: Requestable {
                 Fail<T, NetworkError>(error: NetworkError.badURL("Invalid Url"))
             )
         }
-        // We use the dataTaskPublisher from the URLSession which gives us a publisher to play around with.
-        return URLSession.shared
+
+         return URLSession.shared
             .dataTaskPublisher(for: req.buildURLRequest(with: url))
             .tryMap { output in
                      // throw an error if response is nil

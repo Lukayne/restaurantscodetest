@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Filter: Decodable {
+struct Filter: Decodable, Identifiable, Equatable, Hashable {
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -18,4 +18,13 @@ struct Filter: Decodable {
     let id: String
     let name: String
     let imageURL: String
+    
+    static func ==(lhs: Filter, rhs: Filter) -> Bool {
+        return lhs.id == rhs.id && lhs.name == rhs.name && lhs.imageURL == rhs.imageURL
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
 }

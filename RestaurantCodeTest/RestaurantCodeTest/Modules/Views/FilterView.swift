@@ -9,79 +9,60 @@ import SwiftUI
 
 struct FilterView: View {
     
+    @ObservedObject var restaurantListViewModel: RestaurantListViewModel
+    @StateObject private var imageLoader: ImageLoader
     var filter: Filter
     
-    @State var isFilterSelected: Bool
+    init(filter: Filter, restaurantListViewModel: RestaurantListViewModel) {
+        self.filter = filter
+        self.restaurantListViewModel = restaurantListViewModel
+        self._imageLoader = StateObject(wrappedValue: ImageLoader(url: filter.imageURL))
+    }
     
     var body: some View {
-        HStack(spacing: 16) {
             filterChip
                 .onTapGesture {
-                    withAnimation(Animation.easeOut(duration: 0.8)) {
-                        isFilterSelected.toggle()
+                    withAnimation(Animation.easeOut(duration: 0.3)) {
+                        restaurantListViewModel.toggleFilter(filter)
                     }
                 }
-        }
-        .padding(0)
-        .frame(width: 144, height: 48, alignment: .center)
+                .frame(height: 48)
     }
     
     @ViewBuilder private var filterChip: some View {
         HStack(alignment: .center, spacing: 8) {
             Rectangle()
-                .foregroundColor(.clear)
+                .foregroundStyle(.clear)
                 .frame(width: 48, height: 48)
-                .background(
-                    Image("PLACEHOLDER")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 48, height: 48)
-                        .clipped()
+                .overlay(
+                    (
+                        imageLoader.image != nil ?
+                        AnyView(
+                            imageLoader.image!
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 48, height: 48)
+                                .clipped()
+                        ) : AnyView(ProgressView())
+                    )
                 )
-            Text("Top rated")
+            
+            Text(filter.name)
                 .modifier(TextTitle2())
+                .foregroundColor(restaurantListViewModel.selectedFilters.contains(filter) ? lightText : .black)
         }
+        .background(restaurantListViewModel.selectedFilters.contains(filter) ? selectedColor : Color.white.opacity(0.4))
         .padding(.leading, 0)
         .padding(.trailing, 16)
         .padding(.vertical, 0)
-        .background(.white.opacity(0.4))
         .cornerRadius(24)
         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
-        
-    }
-    
-    @ViewBuilder private var filterSelected: some View {
-        HStack(alignment: .center, spacing: 8) {
-            Rectangle()
-                .foregroundColor(.clear)
-                .frame(width: 48, height: 48)
-                .background(
-                    Image("PLACEHOLDER")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 48, height: 48)
-                        .clipped()
-                )
-            Text("Top rated / selected")
-                .modifier(TextTitle2())
-                .foregroundColor(lightText)
-        }
-        .padding(.leading, 0)
-        .padding(.trailing, 16)
-        .padding(.vertical, 0)
-        .background(selectedColor)
-        .cornerRadius(24)
-        .shadow(color: .black.opacity(0.04), radius: 5, x: 0, y: 4)
-        .onTapGesture {
-            withAnimation(Animation.easeOut(duration: 0.8)) {
-                isFilterSelected.toggle()
-            }
-        }
     }
 }
+
     
 struct FilterView_Previews: PreviewProvider {
     static var previews: some View {
-        FilterView(filter: Filter(id: "id", name: "Top Rated", imageURL: "imageURL"), isFilterSelected: false)
+        FilterView(filter: Filter(id: "id", name: "Top Rated", imageURL: "imageURL"), restaurantListViewModel: RestaurantListViewModel())
     }
 }

@@ -9,10 +9,9 @@ import SwiftUI
 
 struct TextHeadline2: ViewModifier {
     
-    
     func body(content: Content) -> some View {
         content
             .font(.custom("Helvetica-Regular", size: 16))
-            .frame(width: 141, height: 18, alignment: .topLeading)
+//            .frame(width: 141, height: 18, alignment: .topLeading)
     }
 }

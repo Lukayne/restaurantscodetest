@@ -7,7 +7,6 @@
 
 import Foundation
 import Combine
-import SwiftUI
 
 enum RestaurantState: Equatable, CaseIterable {
     case loadingFilters
@@ -23,15 +22,17 @@ class RestaurantListViewModel: ObservableObject {
     static let shared = RestaurantListViewModel()
     
     @Published var restaurantState: RestaurantState = .loadingRestaurants
-
     @Published var restaurantsWithFilterNames: [RestaurantWrapper] = []
-    @Published var filtersWithImages: [FilterWrapper] = []
     @Published var filters: [Filter] = []
     @Published var selectedRestaurant: RestaurantWrapper = RestaurantWrapper(restaurant: Restaurant(id: "", name: "", rating: 0, filterIds: [""], imageURL: "", deliveryTimeInMinutes: 0))
+    @Published var filteredRestaurants: [RestaurantWrapper] = []
+    @Published var selectedFilters: Set<Filter> = [] {
+        didSet {
+            filterRestaurants()
+        }
+    }
     
-    @Published private var imagesToLoadRestaurant: [String: String] = [:]
     @Published private var filterNames: [String] = []
-    @Published private var loadedImages: [String: Image] = [:]
     
     private var bag = Set<AnyCancellable>()
     
@@ -44,6 +45,14 @@ class RestaurantListViewModel: ObservableObject {
     
     func onAppear() {
         loadAllRestaurants()
+    }
+    
+    func toggleFilter(_ filter: Filter) {
+        if selectedFilters.contains(filter) {
+            selectedFilters.remove(filter)
+        } else {
+            selectedFilters.insert(filter)
+        }
     }
     
     private func loadAllRestaurants() {
@@ -59,58 +68,47 @@ class RestaurantListViewModel: ObservableObject {
                 }
             } receiveValue: { [weak self] response in
                 guard let self = self else { return }
-
-                // Create an array of RestaurantWrapper instances
-                let restaurantWrappers: [RestaurantWrapper] = response.restaurants.map { RestaurantWrapper(restaurant: $0) }
-
+                
                 // Use Combine's MergeMany to handle multiple asynchronous requests for filter objects
+                var uniqueFilterIds = Set<String>() // Keep track of unique filterIds
                 let filterRequests = response.restaurants
                     .flatMap { restaurant in
-                        restaurant.filterIds.map { filterID in
-                            service.getFilter(filterId: filterID)
-                                .replaceError(with: Filter(id: "", name: "", imageURL: ""))
-                                .map { $0.name }
-                            // Ensure UI updates on the main thread
-                                .receive(on: DispatchQueue.main)
-                                .eraseToAnyPublisher()
-                        }
+                        restaurant.filterIds
+                            .filter { uniqueFilterIds.insert($0).inserted } // Insert unique filterIds into the Set
+                            .map { filterID in
+                                service.getFilter(filterId: filterID)
+                                    .replaceError(with: Filter(id: "", name: "", imageURL: ""))
+                                // Ensure UI updates on the main thread
+                                    .receive(on: DispatchQueue.main)
+                                    .eraseToAnyPublisher()
+                            }
                     }
-
+                
                 let cancellable = Publishers.MergeMany(filterRequests)
                     .collect()
-                    .sink { filterNames in
+                    .sink { receivedFilters in
+                        // Save received filters into the `filters` variable
+                        self.filters = receivedFilters
+                        
+                        // Continue with the rest of the processing
                         var groupedFilterNames: [String: [String]] = [:]
-
-                        var currentIndex = 0
-
+                        
                         for restaurant in response.restaurants {
-                            var filterNamesForRestaurant: [String] = []
-                            
-                            for _ in restaurant.filterIds {
-                                filterNamesForRestaurant.append(filterNames[currentIndex])
-                                currentIndex += 1
+                            let filterNamesForRestaurant = restaurant.filterIds.compactMap { filterID in
+                                self.filters.first { $0.id == filterID }?.name
                             }
                             
                             groupedFilterNames[restaurant.id] = filterNamesForRestaurant
                         }
-
+                        
                         self.restaurantsWithFilterNames = response.restaurants.map { restaurant in
                             let wrapper = RestaurantWrapper(restaurant: restaurant)
                             wrapper.filterNames = groupedFilterNames[restaurant.id] ?? []
                             return wrapper
                         }
                         
+                        self.filteredRestaurants = self.restaurantsWithFilterNames
                         
-                        // Load images for all restaurants
-//                        for wrapper in restaurantWrappers {
-//                            self.loadImageForRestaurant(
-//                                id: wrapper.restaurant.id,
-//                                stringURL: wrapper.restaurant.imageURL
-//                            )
-//                        }
-                        
-                        
-
                         // Assuming `restaurantState` is a non-optional property
                         self.restaurantState = .finishedLoading
                     }
@@ -118,52 +116,74 @@ class RestaurantListViewModel: ObservableObject {
             }
             .store(in: &bag)
     }
-
-    private func loadImage(id: String, stringURL: String) {
-        let imageLoader = ImageLoader(url: stringURL)
-        
-        imageLoader.$image
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] loadedImage in
-                // Handle the loaded image here
-                if let loadedImage = loadedImage {
-                    // Update the corresponding RestaurantWrapper's image property
-                    if let restaurantWrapper = self?.restaurantsWithFilterNames.first(where: { $0.restaurant.id == id }) {
-                        restaurantWrapper.image = loadedImage
-                    }
-                }
-            }
-            .store(in: &bag)
-    }
     
-    private func loadImageForFilter(id: String, stringURL: String) {
-        
-        let imageLoader = ImageLoader(url: stringURL)
-        
-        imageLoader.$image
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] loadedFilterImage in
-                if let loadedFilterImage = loadedFilterImage {
-                    if let filterWrapper = self?.filtersWithImages.first(where: { $0.filter.id == id }) {
-                        filterWrapper.image = loadedFilterImage
-                    }
-                }
+    private func filterRestaurants() {
+        if selectedFilters.isEmpty {
+            // If no filters are selected, show all restaurants
+            filteredRestaurants = restaurantsWithFilterNames
+        } else {
+            // Filter restaurants based on selected filters
+            filteredRestaurants = restaurantsWithFilterNames.filter { restaurantWrapper in
+                // Check if any of the restaurant's filter IDs or filter names match the selected filters
+                let restaurantFilterIdsSet = Set(restaurantWrapper.restaurant.filterIds)
+                let selectedFilterIdsSet = Set(selectedFilters.map { $0.id })
+                
+                return !restaurantFilterIdsSet.isDisjoint(with: selectedFilterIdsSet)
             }
-            .store(in: &bag)
-    }
-    
-    // Function to trigger image loading
-    func loadImageForRestaurant(id: String, stringURL: String) {
-        // Update the imagesToLoad dictionary
-        imagesToLoadRestaurant[id] = stringURL
-
-        // Load the image
-        loadImage(id: id, stringURL: stringURL)
+        }
     }
 }
 
 
-// TODO: Check if this is still needed or not
+// MARK: How I would implement image caching
+
+//@Published var filtersWithImages: [FilterWrapper] = []
+//@Published private var imagesToLoadRestaurant: [String: String] = [:]
+//@Published private var loadedImages: [String: Image] = [:]
+
+//private func loadImage(id: String, stringURL: String) {
+//    let imageLoader = ImageLoader(url: stringURL)
+//    
+//    imageLoader.$image
+//        .receive(on: DispatchQueue.main)
+//        .sink { [weak self] loadedImage in
+//            // Handle the loaded image here
+//            if let loadedImage = loadedImage {
+//                // Update the corresponding RestaurantWrapper's image property
+//                if let restaurantWrapper = self?.restaurantsWithFilterNames.first(where: { $0.restaurant.id == id }) {
+//                    restaurantWrapper.image = loadedImage
+//                }
+//            }
+//        }
+//        .store(in: &bag)
+//}
+//
+//private func loadImageForFilter(id: String, stringURL: String) {
+//    
+//    let imageLoader = ImageLoader(url: stringURL)
+//    
+//    imageLoader.$image
+//        .receive(on: DispatchQueue.main)
+//        .sink { [weak self] loadedFilterImage in
+//            if let loadedFilterImage = loadedFilterImage {
+//                if let filterWrapper = self?.filtersWithImages.first(where: { $0.filter.id == id }) {
+//                    filterWrapper.image = loadedFilterImage
+//                }
+//            }
+//        }
+//        .store(in: &bag)
+//}
+//
+//// Function to trigger image loading
+//func loadImageForRestaurant(id: String, stringURL: String) {
+//    // Update the imagesToLoad dictionary
+//    imagesToLoadRestaurant[id] = stringURL
+//
+//    // Load the image
+//    loadImage(id: id, stringURL: stringURL)
+//}
+
+// MARK: Only saved this to show other types of implementations if one shouldn't wait for all of the filters to load.
 
 //    private func loadAllRestaurants() {
 //        restaurantState = .loadingRestaurants
